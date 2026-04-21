@@ -26,28 +26,71 @@ class Book(db.Model):
 
     @classmethod
     def create(cls, title, author=None, year=None, isbn=None, cover_url=None, category_id=None, rating=None, status='想讀'):
-        book = cls(
-            title=title, author=author, year=year, isbn=isbn, cover_url=cover_url,
-            category_id=category_id, rating=rating, status=status
-        )
-        db.session.add(book)
-        db.session.commit()
-        return book
+        """
+        建立書籍記錄。
+        :return: Book 物件 或 None
+        """
+        try:
+            book = cls(
+                title=title, author=author, year=year, isbn=isbn, cover_url=cover_url,
+                category_id=category_id, rating=rating, status=status
+            )
+            db.session.add(book)
+            db.session.commit()
+            return book
+        except Exception as e:
+            db.session.rollback()
+            print(f"建立書籍失敗: {e}")
+            return None
 
     @classmethod
     def get_all(cls):
-        return cls.query.order_by(cls.created_at.desc()).all()
+        """
+        取得所有書籍，依建立時間降序。
+        """
+        try:
+            return cls.query.order_by(cls.created_at.desc()).all()
+        except Exception as e:
+            print(f"讀取書單失敗: {e}")
+            return []
 
     @classmethod
     def get_by_id(cls, id):
-        return cls.query.get(id)
+        """
+        取得單一書籍資訊。
+        """
+        try:
+            return cls.query.get(id)
+        except Exception as e:
+            print(f"讀取書籍 {id} 失敗: {e}")
+            return None
 
     def update(self, **kwargs):
-        for key, value in kwargs.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
-        db.session.commit()
+        """
+        更新書籍屬性。
+        :param kwargs: 欲更新的欄位字典
+        :return: Boolean 是否成功
+        """
+        try:
+            for key, value in kwargs.items():
+                if hasattr(self, key):
+                    setattr(self, key, value)
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            print(f"更新書籍失敗: {e}")
+            return False
 
     def delete(self):
-        db.session.delete(self)
-        db.session.commit()
+        """
+        刪除書籍及其關聯的心得。
+        """
+        try:
+            db.session.delete(self)
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            print(f"刪除書籍失敗: {e}")
+            return False

@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+
+# Database
+instance/
+*.db
+*.sqlite3
+
+# Tools & Temp
+scratch/
+.agents/
+.DS_Store

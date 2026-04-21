@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}編輯心得 - {{ note.book.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <h1 class="mb-4">✏️ 編輯心得筆記</h1>
+            <h5 class="text-muted mb-5">書籍：{{ note.book.title }}</h5>
+
+            <form method="POST" class="needs-validation">
+                {{ form.hidden_tag() }}
+                
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">{{ form.highlight.label }}</label>
+                    {{ form.highlight(class="form-control") }}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">{{ form.content.label }}</label>
+                    {{ form.content(class="form-control", rows="10") }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-semibold">{{ form.start_date.label }}</label>
+                        {{ form.start_date(class="form-control", type="date") }}
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-semibold">{{ form.finish_date.label }}</label>
+                        {{ form.finish_date(class="form-control", type="date") }}
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    {{ form.submit(class="btn btn-primary btn-lg px-5", value="儲存變更") }}
+                    <a href="{{ url_for('books.detail', id=note.book_id) }}" class="btn btn-link py-2 text-muted text-decoration-none">取消</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

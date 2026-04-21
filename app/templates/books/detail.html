@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}{{ book.title }} - 詳情{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-cover {
+        width: 100%;
+        max-width: 300px;
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
+    .note-card {
+        border-radius: 12px;
+        border-left: 4px solid var(--primary-color) !important;
+        background-color: #fff;
+    }
+    .highlight-quote {
+        font-style: italic;
+        color: #475569;
+        border-left: 2px solid #e2e8f0;
+        padding-left: 1rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('books.list_books') }}">全部書單</a></li>
+        <li class="breadcrumb-item active">{{ book.title }}</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-md-4 text-center mb-4">
+        {% if book.cover_url %}
+            <img src="{{ book.cover_url }}" class="detail-cover mb-4" alt="{{ book.title }}">
+        {% else %}
+            <div class="detail-cover bg-light d-flex align-items-center justify-content-center text-muted mb-4 mx-auto" style="height: 400px;">
+                <span class="fs-1">📖</span>
+            </div>
+        {% endif %}
+        
+        <div class="d-grid gap-2">
+            <a href="{{ url_for('books.edit', id=book.id) }}" class="btn btn-outline-primary">編輯書籍資訊</a>
+            <form action="{{ url_for('books.delete', id=book.id) }}" method="POST" onsubmit="return confirm('確定要刪除這本書嗎？相關筆記也會一併刪除。');">
+                <button type="submit" class="btn btn-outline-danger w-100">刪除書籍</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="mb-4">
+            <span class="badge bg-secondary mb-2">{{ book.status }}</span>
+            {% if book.category %}
+                <span class="badge bg-info text-dark ms-1">{{ book.category.name }}</span>
+            {% endif %}
+            <h1 class="display-5 mb-2">{{ book.title }}</h1>
+            <p class="fs-5 text-muted mb-3">作者：{{ book.author or '未知' }} | 出版：{{ book.year or '未知' }}</p>
+            
+            <div class="fs-4 text-warning mb-4">
+                {% if book.rating %}
+                    {% for i in range(book.rating) %}★{% endfor %}
+                    {% for i in range(5 - book.rating) %}<span class="text-muted">☆</span>{% endfor %}
+                {% else %}
+                    <small class="text-muted">尚未評分</small>
+                {% endif %}
+            </div>
+        </div>
+
+        <hr role="separator" class="my-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="mb-0">閱讀心得 & 筆記</h3>
+            <a href="{{ url_for('notes.create', book_id=book.id) }}" class="btn btn-primary btn-sm">+ 新增心得</a>
+        </div>
+
+        {% if book.notes %}
+            {% for note in book.notes %}
+                <div class="card note-card border-0 shadow-sm p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="small text-muted">{{ note.created_at.strftime('%Y-%m-%d') }}</div>
+                        <div class="dropdown">
+                            <button class="btn btn-link btn-sm text-muted" data-bs-toggle="dropdown">•••</button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('notes.edit', id=note.id) }}">編輯</a></li>
+                                <li>
+                                    <form action="{{ url_for('notes.delete', id=note.id) }}" method="POST">
+                                        <button type="submit" class="dropdown-item text-danger">刪除</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    {% if note.highlight %}
+                        <div class="highlight-quote">
+                            "{{ note.highlight }}"
+                        </div>
+                    {% endif %}
+                    
+                    <div class="note-content" style="white-space: pre-wrap;">{{ note.content }}</div>
+                    
+                    {% if note.start_date or note.finish_date %}
+                        <div class="mt-3 pt-3 border-top small text-muted">
+                            閱讀週期：{{ note.start_date or '?' }} ~ {{ note.finish_date or '?' }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-5 bg-white rounded-3 shadow-sm">
+                <p class="text-muted mb-0">這本書還沒有心得，點擊「新增心得」記錄您的想法。</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

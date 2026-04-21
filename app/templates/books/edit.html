@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}編輯 - {{ book.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <h1 class="mb-4">✏️ 編輯書籍資訊</h1>
+            <p class="text-muted mb-5">修改書籍的基本資料。</p>
+
+            <form method="POST" class="needs-validation">
+                {{ form.hidden_tag() }}
+                
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">{{ form.title.label }}</label>
+                    {{ form.title(class="form-control form-control-lg") }}
+                    {% if form.title.errors %}
+                        {% for error in form.title.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-semibold">{{ form.author.label }}</label>
+                        {{ form.author(class="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-semibold">{{ form.category_id.label }}</label>
+                        {{ form.category_id(class="form-select") }}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">{{ form.cover_url.label }}</label>
+                    {{ form.cover_url(class="form-control") }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <label class="form-label fw-semibold">{{ form.year.label }}</label>
+                        {{ form.year(class="form-control") }}
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <label class="form-label fw-semibold">{{ form.status.label }}</label>
+                        {{ form.status(class="form-select") }}
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <label class="form-label fw-semibold">{{ form.rating.label }}</label>
+                        {{ form.rating(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    {{ form.submit(class="btn btn-primary btn-lg px-5", value="儲存變更") }}
+                    <a href="{{ url_for('books.detail', id=book.id) }}" class="btn btn-link py-2 text-muted text-decoration-none">取消</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

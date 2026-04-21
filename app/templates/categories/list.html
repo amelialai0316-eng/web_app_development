@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}分類管理 - 讀書筆記本{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm p-4 rounded-4 mb-4">
+            <h3 class="mb-4">➕ 新增分類</h3>
+            <form method="POST" action="{{ url_for('categories.list_categories') }}">
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ form.name.label }}</label>
+                    {{ form.name(class="form-control", placeholder="例如：心理學、小說") }}
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">{{ form.color.label }}</label>
+                    {{ form.color(class="form-control", placeholder="例如：#4f46e5 或 blue") }}
+                </div>
+                {{ form.submit(class="btn btn-primary w-100") }}
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm p-4 rounded-4">
+            <h3 class="mb-4">📋 所有分類</h3>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>名稱</th>
+                            <th>代表色</th>
+                            <th>書籍數量</th>
+                            <th class="text-end">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in categories %}
+                        <tr>
+                            <td>
+                                <span class="fw-bold">{{ cat.name }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle me-2" style="width: 15px; height: 15px; background-color: {{ cat.color or '#ccc' }};"></div>
+                                    <span class="small text-muted">{{ cat.color or '預設' }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ cat.books|length }}</span>
+                            </td>
+                            <td class="text-end">
+                                <form action="{{ url_for('categories.delete', id=cat.id) }}" method="POST" onsubmit="return confirm('確定要刪除這個分類嗎？');" style="display: inline;">
+                                    <button type="submit" class="btn btn-link text-danger p-0 text-decoration-none small">刪除</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">目前尚未建立任何分類。</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

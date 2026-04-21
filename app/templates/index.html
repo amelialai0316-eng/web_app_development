@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}首頁 - 讀書筆記本{% endblock %}
+
+{% block content %}
+<div class="row align-items-center py-5">
+    <div class="col-lg-6">
+        <h1 class="display-4 mb-3">歡迎回到您的<br><span class="text-primary">閱讀小天地</span></h1>
+        <p class="lead text-muted mb-4">在這裡，每一份閱讀足跡都能被妥善保存。您可以輕鬆記錄心得、管理分類，並隨時找回那些珍貴的閱讀洞見。</p>
+        <div class="d-flex gap-3">
+            <a href="{{ url_for('books.create') }}" class="btn btn-primary btn-lg">開始記錄新書</a>
+            <a href="{{ url_for('books.list_books') }}" class="btn btn-outline-secondary btn-lg">瀏覽我的書單</a>
+        </div>
+    </div>
+    <div class="col-lg-6 text-center d-none d-lg-block">
+        <div class="p-5 bg-white rounded-circle shadow-lg d-inline-block" style="width: 400px; height: 400px; line-height: 300px; overflow: hidden;">
+            <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1000&auto=format&fit=crop" class="img-fluid" alt="Books">
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-4 mb-4" style="border-left: 5px solid #4f46e5 !important;">
+            <div class="text-muted small mb-1">已記錄書籍</div>
+            <h2 class="mb-0">{{ stats.total_books }} <small class="fs-6 text-muted">本</small></h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-4 mb-4" style="border-left: 5px solid #10b981 !important;">
+            <div class="text-muted small mb-1">已讀完</div>
+            <h2 class="mb-0">{{ stats.finished_books }} <small class="fs-6 text-muted">本</small></h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-4 mb-4" style="border-left: 5px solid #f59e0b !important;">
+            <div class="text-muted small mb-1">平均評分</div>
+            <h2 class="mb-0">{{ "%.1f"|format(stats.avg_rating) }} <small class="fs-6 text-muted">★</small></h2>
+        </div>
+    </div>
+</div>
+
+<div class="mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">最近更新的筆記</h3>
+        <a href="{{ url_for('books.list_books') }}" class="text-primary text-decoration-none">查看更多 &rarr;</a>
+    </div>
+    <div class="row">
+        {% for note in recent_notes %}
+            <div class="col-12 mb-3">
+                <div class="card border-0 shadow-sm p-3">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="mb-1"><a href="{{ url_for('books.detail', id=note.book.id) }}" class="text-dark text-decoration-none">{{ note.book.title }}</a></h6>
+                        <small class="text-muted">{{ note.created_at.strftime('%Y-%m-%d') }}</small>
+                    </div>
+                    <p class="text-muted small mb-0 text-truncate">{{ note.content }}</p>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12 text-center py-5 bg-white rounded-4 shadow-sm">
+                <p class="text-muted mb-0">目前還沒有筆記，點擊「新增書籍」開始您的閱讀之旅吧！</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
