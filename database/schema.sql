@@ -1,0 +1,44 @@
+CREATE TABLE category (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    color VARCHAR(20)
+);
+
+CREATE TABLE tag (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE book (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title VARCHAR(200) NOT NULL,
+    author VARCHAR(100),
+    year INTEGER,
+    isbn VARCHAR(20),
+    cover_url VARCHAR(500),
+    category_id INTEGER,
+    rating INTEGER CHECK(rating >= 1 AND rating <= 5),
+    status VARCHAR(20) NOT NULL DEFAULT '想讀',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(category_id) REFERENCES category(id) ON DELETE SET NULL
+);
+
+CREATE TABLE note (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    book_id INTEGER NOT NULL,
+    content TEXT,
+    highlight TEXT,
+    start_date DATE,
+    finish_date DATE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(book_id) REFERENCES book(id) ON DELETE CASCADE
+);
+
+CREATE TABLE book_tag (
+    book_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
+    PRIMARY KEY (book_id, tag_id),
+    FOREIGN KEY(book_id) REFERENCES book(id) ON DELETE CASCADE,
+    FOREIGN KEY(tag_id) REFERENCES tag(id) ON DELETE CASCADE
+);
