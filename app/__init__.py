@@ -15,12 +15,14 @@ def create_app(config_class=Config):
     from .routes.notes import notes_bp
     from .routes.categories import categories_bp
     from .routes.search import search_bp
+    from .routes.calculator import calculator_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(books_bp)
     app.register_blueprint(notes_bp)
     app.register_blueprint(categories_bp)
     app.register_blueprint(search_bp)
+    app.register_blueprint(calculator_bp)
 
     with app.app_context():
         db.create_all()

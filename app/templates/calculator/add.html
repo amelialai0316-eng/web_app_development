@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}新增課程紀錄{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('calculator.index') }}">學分試算</a></li>
+                <li class="breadcrumb-item active" aria-current="page">新增課程</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+            <div class="card-header bg-primary text-white py-3 border-0">
+                <h2 class="h5 mb-0">📘 新增課程紀錄</h2>
+            </div>
+            <div class="card-body p-4">
+                <form action="{{ url_for('calculator.add_course') }}" method="POST">
+                    <div class="mb-4">
+                        <label for="name" class="form-label fw-semibold">課程名稱 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-lg" id="name" name="name" placeholder="例如：資料結構" required>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="credits" class="form-label fw-semibold">學分數 <span class="text-danger">*</span></label>
+                            <input type="number" step="0.5" class="form-control" id="credits" name="credits" placeholder="3" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="category" class="form-label fw-semibold">課程類別 <span class="text-danger">*</span></label>
+                            <select class="form-select" id="category" name="category" required>
+                                <option value="" selected disabled>請選擇</option>
+                                <option value="必修">必修</option>
+                                <option value="選修">選修</option>
+                                <option value="通識">通識</option>
+                                <option value="體育/軍訓">體育/軍訓</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="status" class="form-label fw-semibold">修習狀態 <span class="text-danger">*</span></label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="status" id="completed" value="已完成" checked onchange="toggleGrades(true)">
+                                <label class="form-check-label" for="completed">已完成</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="status" id="studying" value="修習中" onchange="toggleGrades(false)">
+                                <label class="form-check-label" for="studying">修習中</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="status" id="pending" value="待修習" onchange="toggleGrades(false)">
+                                <label class="form-check-label" for="pending">待修習</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="grade-section">
+                        <hr class="my-4">
+                        <h5 class="h6 mb-3 text-primary fw-bold">成績紀錄 (選填)</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="score" class="form-label fw-semibold">百分制成績 (0-100)</label>
+                                <input type="number" step="0.1" class="form-control" id="score" name="score" placeholder="例如：85">
+                                <div class="form-text text-muted">輸入後將自動轉換為等第</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="grade" class="form-label fw-semibold">等第</label>
+                                <select class="form-select" id="grade" name="grade">
+                                    <option value="" selected>無成績</option>
+                                    <option value="A+">A+ (4.3)</option>
+                                    <option value="A">A (4.0)</option>
+                                    <option value="A-">A- (3.7)</option>
+                                    <option value="B+">B+ (3.3)</option>
+                                    <option value="B">B (3.0)</option>
+                                    <option value="B-">B- (2.7)</option>
+                                    <option value="C+">C+ (2.3)</option>
+                                    <option value="C">C (2.0)</option>
+                                    <option value="C-">C- (1.7)</option>
+                                    <option value="F">F (0.0)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">儲存紀錄</button>
+                        <a href="{{ url_for('calculator.index') }}" class="btn btn-light text-muted">取消返回</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleGrades(show) {
+        document.getElementById('grade-section').style.display = show ? 'block' : 'none';
+    }
+</script>
+{% endblock %}

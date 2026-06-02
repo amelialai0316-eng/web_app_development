@@ -1,69 +1,52 @@
-# 路由設計文件 (ROUTES)
+# 路由設計 (Routes Design)
 
 ## 1. 路由總覽表格
 
 | 功能 | HTTP 方法 | URL 路徑 | 對應模板 | 說明 |
 | :--- | :--- | :--- | :--- | :--- |
-| **首頁 / 儀表板** | GET | `/` | `index.html` | 顯示閱讀統計（總量、平均評分）與最近筆記 |
-| **書單列表** | GET | `/books` | `books/list.html` | 顯示所有書目，支援分類與評分篩選 |
-| **新增書籍頁面** | GET | `/books/create` | `books/create.html` | 顯示新增書籍的表單 |
-| **建立書籍** | POST | `/books/create` | — | 接收表單、驗證並存入資料庫後重導向至書單 |
-| **書籍詳情** | GET | `/books/<id>` | `books/detail.html` | 顯示單一書籍的詳細資訊、評分與相關心得 |
-| **編輯書籍頁面** | GET | `/books/<id>/edit` | `books/edit.html` | 顯示書籍編輯表單（帶入既有資料） |
-| **更新書籍** | POST | `/books/<id>/edit` | — | 接收編輯表單、更新資料庫後重導向至詳情頁 |
-| **刪除書籍** | POST | `/books/<id>/delete` | — | 刪除書籍及其關聯的心得與標籤關聯 |
-| **新增心得頁面** | GET | `/books/<id>/notes/create` | `notes/create.html` | 顯示為特定書籍新增心得的表單 |
-| **建立心得** | POST | `/books/<id>/notes/create` | — | 接收心得內容與金句，存入資料庫 |
-| **編輯心得頁面** | GET | `/notes/<id>/edit` | `notes/edit.html` | 顯示心得編輯表單 |
-| **更新心得** | POST | `/notes/<id>/edit` | — | 更新特定心得內容 |
-| **刪除心得** | POST | `/notes/<id>/delete` | — | 刪除單筆心得 |
-| **分類管理頁面** | GET | `/categories` | `categories/list.html` | 顯示所有分類與新增分類表單 |
-| **建立分類** | POST | `/categories/create` | — | 接收分類名稱與顏色，存入資料庫 |
-| **刪除分類** | POST | `/categories/<id>/delete` | — | 刪除分類（受保護操作，避免誤刪） |
-| **搜尋結果** | GET | `/search` | `search/results.html` | 根據關鍵字 `q` 進行跨欄位模糊搜尋 |
+| 計分引擎儀表板 | GET | `/calculator` | `calculator/index.html` | 顯示學分統計與 GPA 概況 |
+| 新增課程頁面 | GET | `/calculator/add` | `calculator/add.html` | 顯示新增課程表單 |
+| 執行新增課程 | POST | `/calculator/add` | — | 接收資料、計算學分、重導向回儀表板 |
+| 編輯課程頁面 | GET | `/calculator/edit/<id>` | `calculator/edit.html` | 顯示編輯表單 |
+| 執行更新課程 | POST | `/calculator/update/<id>` | — | 更新資料庫紀錄 |
+| 執行刪除課程 | POST | `/calculator/delete/<id>` | — | 刪除紀錄並重導向 |
+| 切換 GPA 制式 | POST | `/calculator/toggle-scale` | — | 切換 4.0/4.3 計算標準 |
 
-## 2. 路由詳細說明
+---
 
-### 2.1 書籍模組 (`/books`)
-- **GET `/books`**:
-    - 輸入：`category` (選填), `rating` (選填), `sort` (選填)。
-    - 邏輯：呼叫 `Book.get_all()` 並套用篩選。
-- **POST `/books/create`**:
-    - 輸入：書名、作者、出版年份、ISBN、封面 URL、分類、狀態。
-    - 處理：使用 `BookForm` 驗證，呼叫 `Book.create()`。
-    - 錯誤：驗證失敗則重新渲染 `books/create.html` 並顯示錯誤。
+## 2. 每個路由的詳細說明
 
-### 2.2 心得模組 (`/notes`)
-- **POST `/books/<id>/notes/create`**:
-    - 輸入：心得內容、重點摘錄、開始/結束日期。
-    - 處理：呼叫 `Note.create(book_id=id, ...)`。
-    - 輸出：重導向至 `books/detail.html`。
+### `GET /calculator`
+- **處理邏輯**：從 DB 讀取所有 `Course` 紀錄。分別加總已完成、修習中、待修習學分。計算 4.3 與 4.0 GPA。
+- **渲染模板**：`calculator/index.html`
+- **傳遞數據**：`courses`, `total_credits`, `completed_credits`, `gpa_43`, `gpa_40`...
 
-### 2.3 搜尋模組 (`/search`)
-- **GET `/search?q=...`**:
-    - 輸入：`q` (關鍵字)。
-    - 邏輯：查詢 `Book.title`、`Book.author` 與 `Note.content` 包含 `q` 的結果。
+### `POST /calculator/add`
+- **輸入**：`name`, `credits`, `category`, `status`, `score` (optional), `grade` (optional)。
+- **處理邏輯**：
+    1. 驗證資料。
+    2. 若有 `score` 但無 `grade`，呼叫 `Course.score_to_grade()` 自動轉換。
+    3. 調用 `Course.create()`。
+- **輸出**：重導向至 `/calculator`。
+
+### `POST /calculator/toggle-scale`
+- **處理邏輯**：修改 Session 中的 `gpa_scale` 變數（4.0 或 4.3）。
+- **輸出**：重導向回原頁面。
+
+---
 
 ## 3. Jinja2 模板清單
 
-所有模板皆繼承 `base.html`。
+| 模板檔案 | 繼承對象 | 說明 |
+| :--- | :--- | :--- |
+| `base.html` | — | 基礎佈局 (Header, Footer, CSS links) |
+| `calculator/index.html` | `base.html` | 數據摘要儀表板與課程清單 |
+| `calculator/add.html` | `base.html` | 新增課程的互動式表單 |
+| `calculator/edit.html` | `base.html` | 編輯現有課程紀錄的表單 |
 
-- `base.html`: 包含導覽列、搜尋框與 flash 訊息區域。
-- `index.html`: 儀表板。
-- `books/list.html`: 書單。
-- `books/detail.html`: 書籍詳情與心得列表。
-- `books/create.html`: 新增書籍。
-- `books/edit.html`: 編輯書籍。
-- `notes/create.html`: 新增心得。
-- `notes/edit.html`: 編輯心得。
-- `categories/list.html`: 分類管理與新增。
-- `search/results.html`: 搜尋結果顯示。
+---
 
 ## 4. 路由骨架程式碼
 
-已在 `app/routes/` 建立對應的 Blueprint：
-- `main.py`
-- `books.py`
-- `notes.py`
-- `categories.py`
-- `search.py`
+- **路徑**：`app/routes/calculator.py`
+- 定義 `calculator_bp` 並建立上述路由的函式定義。

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}學分與 GPA 試算儀表板{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        border: none;
+        border-radius: 16px;
+        transition: transform 0.3s, box-shadow 0.3s;
+        background: #ffffff;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+    .gpa-display {
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #4f46e5, #9333ea);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .badge-completed { background-color: #dcfce7; color: #166534; }
+    .badge-studying { background-color: #fef9c3; color: #854d0e; }
+    .badge-pending { background-color: #f1f5f9; color: #475569; }
+    .table-container {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-5 align-items-center">
+    <div class="col-lg-7">
+        <h1 class="display-5 mb-2">🎓 學業成就儀表板</h1>
+        <p class="text-muted">自動化試算您的學分達成進度與 GPA 績點。</p>
+    </div>
+    <div class="col-lg-5 text-lg-end">
+        <a href="{{ url_for('calculator.add_course') }}" class="btn btn-primary px-4 py-2">+ 新增課程紀錄</a>
+    </div>
+</div>
+
+<!-- 統計數字區 -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="stat-card p-4 text-center">
+            <h6 class="text-uppercase text-muted small fw-bold mb-3">總學分數</h6>
+            <div class="h2 mb-0">{{ total_credits }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card p-4 text-center border-start border-4 border-success">
+            <h6 class="text-uppercase text-muted small fw-bold mb-3">已完成學分</h6>
+            <div class="h2 mb-0 text-success">{{ completed_credits }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card p-4 text-center">
+            <h6 class="text-uppercase text-muted small fw-bold mb-3">GPA ({{ current_scale }} 制)</h6>
+            <div class="gpa-display mb-0">{{ display_gpa }}</div>
+            <form action="{{ url_for('calculator.toggle_scale') }}" method="POST" class="mt-2">
+                <button type="submit" class="btn btn-link btn-sm text-decoration-none">切換至 {{ 4.0 if current_scale == 4.3 else 4.3 }} 制</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card p-4 text-center">
+            <h6 class="text-uppercase text-muted small fw-bold mb-3">修習/待修</h6>
+            <div class="h2 mb-0 text-primary">{{ studying_credits }} / {{ pending_credits }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- 課程清單 -->
+<div class="table-container p-4">
+    <h3 class="h5 mb-4">課程明細</h3>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>課程名稱</th>
+                    <th>類別</th>
+                    <th>學分</th>
+                    <th>狀態</th>
+                    <th>成績 (百分/等第)</th>
+                    <th class="text-end">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in courses %}
+                <tr>
+                    <td class="fw-bold text-dark">{{ course.name }}</td>
+                    <td><span class="badge bg-light text-dark border">{{ course.category }}</span></td>
+                    <td>{{ course.credits }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if course.status == '已完成' %}badge-completed
+                            {% elif course.status == '修習中' %}badge-studying
+                            {% else %}badge-pending{% endif %} px-3 py-2">
+                            {{ course.status }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if course.status == '已完成' %}
+                            {{ course.score if course.score else '-' }} / 
+                            <span class="fw-bold text-primary">{{ course.grade if course.grade else '-' }}</span>
+                        {% else %}
+                            <span class="text-muted small">暫無數據</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <div class="btn-group">
+                            <a href="{{ url_for('calculator.edit_course', id=course.id) }}" class="btn btn-outline-secondary btn-sm">編輯</a>
+                            <form action="{{ url_for('calculator.delete_course', id=course.id) }}" method="POST" class="d-inline" onsubmit="return confirm('確定要刪除嗎？');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm ms-1">刪除</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">目前暫無課程紀錄，請點擊右上方按鈕新增。</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

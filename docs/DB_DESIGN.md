@@ -1,92 +1,60 @@
-# 資料庫設計文件 (DB_DESIGN)
+# 資料庫設計 (Database Design)
 
-## 1. ER 圖（實體關係圖）
+## 1. ER 圖 (Entity Relationship Diagram)
 
 ```mermaid
 erDiagram
-    BOOK {
+    COURSE {
         int id PK
-        string title
-        string author
-        int year
-        string isbn
-        string cover_url
-        int category_id FK
-        int rating
-        string status
-        datetime created_at
-        datetime updated_at
+        string name "課程名稱"
+        float credits "學分數"
+        string category "類別 (必修/選修/通識)"
+        string status "狀態 (已完成/修習中/待修習)"
+        float score "百分制成績 (0-100)"
+        string grade "等級制成績 (A+/A/B...)"
+        datetime created_at "建立時間"
     }
-    NOTE {
-        int id PK
-        int book_id FK
-        text content
-        text highlight
-        date start_date
-        date finish_date
-        datetime created_at
-    }
-    CATEGORY {
-        int id PK
-        string name
-        string color
-    }
-    TAG {
-        int id PK
-        string name
-    }
-    BOOK_TAG {
-        int book_id FK
-        int tag_id FK
-    }
-
-    BOOK ||--o{ NOTE : "has"
-    BOOK }o--|| CATEGORY : "belongs to"
-    BOOK }o--o{ TAG : "tagged with"
 ```
+
+---
 
 ## 2. 資料表詳細說明
 
-### BOOK（書籍表）
-儲存書籍的基本資料與目前的閱讀狀態。
-- `id` (INTEGER): 主鍵，自動遞增。
-- `title` (VARCHAR(200)): 書名，必填。
-- `author` (VARCHAR(100)): 作者，選填。
-- `year` (INTEGER): 出版年份，選填。
-- `isbn` (VARCHAR(20)): ISBN，選填。
-- `cover_url` (VARCHAR(500)): 封面圖片網址，選填。
-- `category_id` (INTEGER): 外鍵，關聯至 `CATEGORY.id`，選填。
-- `rating` (INTEGER): 評分 (1-5)，選填。
-- `status` (VARCHAR(20)): 閱讀狀態 (例如: 想讀, 閱讀中, 已讀完)，必填。
-- `created_at` (DATETIME): 建立時間，必填。
-- `updated_at` (DATETIME): 更新時間，必填。
+### COURSE (課程紀錄表)
 
-### NOTE（閱讀心得表）
-每本書可有多筆閱讀心得或重點筆記。
-- `id` (INTEGER): 主鍵，自動遞增。
-- `book_id` (INTEGER): 外鍵，關聯至 `BOOK.id`，必填。
-- `content` (TEXT): 心得內容，選填。
-- `highlight` (TEXT): 重點摘錄，選填。
-- `start_date` (DATE): 閱讀開始日，選填。
-- `finish_date` (DATE): 閱讀完成日，選填。
-- `created_at` (DATETIME): 建立時間，必填。
+| 欄位名稱 | 型別 | 說明 | 必填 | 備註 |
+| :--- | :--- | :--- | :--- | :--- |
+| id | INTEGER | 流水編號 (PK) | 是 | 自動遞增 |
+| name | TEXT | 課程名稱 | 是 | |
+| credits | REAL | 學分數 | 是 | |
+| category | TEXT | 課程類別 | 是 | 必修, 選修, 通識 |
+| status | TEXT | 修習狀態 | 是 | 已完成, 修習中, 待修習 |
+| score | REAL | 百分制成績 | 否 | 0.0 - 100.0 |
+| grade | TEXT | 等級制成績 | 否 | A+, A, A-, B+... |
+| created_at | DATETIME | 紀錄建立時間 | 是 | 預設為 CURRENT_TIMESTAMP |
 
-### CATEGORY（書籍分類表）
-書籍的分類 (1本對應1個分類)。
-- `id` (INTEGER): 主鍵，自動遞增。
-- `name` (VARCHAR(50)): 分類名稱，必填，需唯一。
-- `color` (VARCHAR(20)): 分類標籤顏色，選填。
-
-### TAG（書籍標籤表）
-自訂標籤。
-- `id` (INTEGER): 主鍵，自動遞增。
-- `name` (VARCHAR(50)): 標籤名稱，必填，需唯一。
-
-### BOOK_TAG（書籍標籤關聯表）
-多對多關聯中介表。
-- `book_id` (INTEGER): 外鍵，關聯至 `BOOK.id`，必填。
-- `tag_id` (INTEGER): 外鍵，關聯至 `TAG.id`，必填。
+---
 
 ## 3. SQL 建表語法
 
-完整建表語法請參考 `database/schema.sql`。
+儲存於 `database/schema.sql`：
+
+```sql
+CREATE TABLE IF NOT EXISTS courses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    credits REAL NOT NULL,
+    category TEXT NOT NULL,
+    status TEXT NOT NULL,
+    score REAL,
+    grade TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+## 4. Python Model 程式碼設計
+
+- **檔案路徑**：`app/models/course.py`
+- 包含 GPA 轉換邏輯與基礎 CRUD 操作。
